@@ -1,0 +1,7 @@
+{
+    "workbench.editor.autoLockGroups": {
+        "default": true,
+        "workbench.editors.gettingStartedInput": true,
+        "web-editor": true
+    }
+}

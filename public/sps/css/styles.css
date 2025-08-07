@@ -2323,7 +2323,7 @@ textarea.form-control-lg {
 .btn-check[disabled] + .btn, .btn-check:disabled + .btn {
   pointer-events: none;
   filter: none;
-  opacity: 0.65;
+  opacity: 0.90;
 }
 
 .form-range {
