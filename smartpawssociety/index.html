@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Paws Society</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .container-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+
+    <!-- Hero Section -->
+    <header class="w-full bg-emerald-600 text-white py-12 container-shadow rounded-b-3xl">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Smart Paws Society</h1>
+            <p class="text-lg md:text-xl opacity-90">Helping you and your best friend communicate and connect.</p>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <main class="w-full max-w-4xl px-4 mt-8">
+        <section id="services" class="bg-white p-8 rounded-2xl container-shadow mb-8">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Our Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Service Card 1 -->
+                <div class="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-xl transition transform hover:scale-105 duration-300">
+                    <svg class="w-16 h-16 text-emerald-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 17l-9 5-9-5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 10l-9 5-9-5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v9" />
+                    </svg>
+                    <h3 class="text-xl font-bold text-gray-700">Puppy Basics</h3>
+                    <p class="mt-2 text-sm text-gray-600">Start your puppy off right with socialization, potty training, and basic commands.</p>
+                </div>
+                <!-- Service Card 2 -->
+                <div class="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-xl transition transform hover:scale-105 duration-300">
+                    <svg class="w-16 h-16 text-emerald-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h2m-2 4h2" />
+                    </svg>
+                    <h3 class="text-xl font-bold text-gray-700">Obedience Training</h3>
+                    <p class="mt-2 text-sm text-gray-600">Master core commands like sit, stay, and recall for a well-behaved companion.</p>
+                </div>
+                <!-- Service Card 3 -->
+                <div class="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-xl transition transform hover:scale-105 duration-300">
+                    <svg class="w-16 h-16 text-emerald-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 100 4m0-4v4m-5 4a2 2 0 100 4m0-4v4m14-4a2 2 0 100 4m0-4v4" />
+                    </svg>
+                    <h3 class="text-xl font-bold text-gray-700">Agility & Fun</h3>
+                    <p class="mt-2 text-sm text-gray-600">Engage your dog's mind and body with fun agility exercises and advanced tricks.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Booking Form Section -->
+        <section id="booking" class="bg-white p-8 rounded-2xl container-shadow mb-8">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Book a Session</h2>
+            <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="serviceType" class="block text-sm font-medium text-gray-700 mb-1">Select Service</label>
+                    <select id="serviceType" name="serviceType" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
+                        <option value="">-- Please select a service --</option>
+                        <option value="Puppy Basics">Puppy Basics</option>
+                        <option value="Obedience Training">Obedience Training</option>
+                        <option value="Agility & Fun">Agility & Fun</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                    <input type="text" id="userName" name="userName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
+                </div>
+                <div>
+                    <label for="dogName" class="block text-sm font-medium text-gray-700 mb-1">Your Dog's Name</label>
+                    <input type="text" id="dogName" name="dogName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
+                </div>
+                <div>
+                    <label for="contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                    <input type="email" id="contactEmail" name="contactEmail" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
+                </div>
+                <div>
+                    <label for="bookingDate" class="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                    <input type="date" id="bookingDate" name="bookingDate" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes (Optional)</label>
+                    <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border"></textarea>
+                </div>
+                <div class="md:col-span-2 text-center">
+                    <button type="submit" class="w-full md:w-auto px-6 py-3 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 ease-in-out">
+                        Book Now
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Bookings List Section -->
+        <section id="myBookings" class="bg-white p-8 rounded-2xl container-shadow mb-8 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-3xl font-bold text-gray-800">Bookings</h2>
+            </div>
+            <div id="bookingsList" class="space-y-4">
+                <!-- Bookings will be rendered here -->
+                <p id="loadingMessage" class="text-center text-gray-500">Loading bookings...</p>
+                <p id="noBookingsMessage" class="text-center text-gray-500 hidden">No bookings have been made yet.</p>
+            </div>
+        </section>
+        
+        <p id="userIdDisplay" class="text-xs text-gray-500 text-center mb-4">User ID: <span id="userIdValue">Loading...</span></p>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set Firebase debug level
+        setLogLevel('debug');
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQXoIZZBszreZjVm1W8hdruxMerS1dy60",
+            authDomain: "smartpawssociety.firebaseapp.com",
+            projectId: "smartpawssociety",
+            storageBucket: "smartpawssociety.appspot.com",
+            messagingSenderId: "8526735724",
+        };
+        const appId = firebaseConfig.projectId;
+        const initialAuthToken = null;
+
+        // Firebase Initialization
+        let app, db, auth, userId;
+
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser.uid;
+                document.getElementById('userIdValue').textContent = userId;
+                console.log("Firebase initialized successfully for user:", userId);
+                
+                // Show the bookings list section after initialization
+                const myBookingsSection = document.getElementById('myBookings');
+                if (myBookingsSection) {
+                    myBookingsSection.classList.remove('hidden');
+                }
+
+                // Set up the real-time listener for bookings
+                setupBookingsListener();
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Initialization Error',
+                    text: 'Could not connect to the database. Please try again later.'
+                });
+            }
+        }
+
+        // Set up real-time listener for bookings
+        function setupBookingsListener() {
+            if (!db) {
+                console.error("Firestore is not initialized.");
+                return;
+            }
+
+            const bookingsCollectionPath = `/artifacts/${appId}/public/data/bookings`;
+            const q = query(collection(db, bookingsCollectionPath));
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const bookingsList = document.getElementById('bookingsList');
+                const loadingMessage = document.getElementById('loadingMessage');
+                const noBookingsMessage = document.getElementById('noBookingsMessage');
+
+                if (!bookingsList || !loadingMessage || !noBookingsMessage) {
+                    console.error("DOM elements not found, aborting snapshot update.");
+                    return;
+                }
+                
+                bookingsList.innerHTML = '';
+                loadingMessage.classList.add('hidden');
+                
+                const bookings = [];
+                snapshot.forEach((doc) => {
+                    bookings.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (bookings.length === 0) {
+                    noBookingsMessage.classList.remove('hidden');
+                } else {
+                    noBookingsMessage.classList.add('hidden');
+                    bookings.forEach(booking => {
+                        const bookingCard = document.createElement('div');
+                        bookingCard.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-200';
+                        bookingCard.innerHTML = `
+                            <p class="font-bold text-lg text-emerald-700">${booking.serviceType}</p>
+                            <p class="text-sm text-gray-600 mt-1">Booked by: <span class="font-semibold">${booking.userName}</span> (<span class="text-xs text-gray-500">${booking.userId}</span>)</p>
+                            <p class="text-sm text-gray-600">For: <span class="font-semibold">${booking.dogName}</span></p>
+                            <p class="text-sm text-gray-600">Date: <span class="font-semibold">${booking.bookingDate}</span></p>
+                            ${booking.notes ? `<p class="text-sm text-gray-600">Notes: ${booking.notes}</p>` : ''}
+                        `;
+                        bookingsList.appendChild(bookingCard);
+                    });
+                }
+            }, (error) => {
+                console.error("Error fetching bookings:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load bookings. Please check the console for details.'
+                });
+            });
+        }
+
+        // Handle form submission
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            const bookingData = {
+                serviceType: form.serviceType.value,
+                userName: form.userName.value,
+                dogName: form.dogName.value,
+                contactEmail: form.contactEmail.value,
+                bookingDate: form.bookingDate.value,
+                notes: form.notes.value,
+                timestamp: new Date(),
+                userId: userId // Add the user ID to the booking document
+            };
+
+            try {
+                if (!db) {
+                    throw new Error("Firestore is not initialized.");
+                }
+
+                const bookingsCollectionPath = `/artifacts/${appId}/public/data/bookings`;
+                const docRef = await addDoc(collection(db, bookingsCollectionPath), bookingData);
+                console.log("Document written with ID: ", docRef.id);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Booking Confirmed!',
+                    text: 'Thank you for your booking. We will be in touch shortly!',
+                    confirmButtonText: 'Great!'
+                });
+
+                form.reset();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to submit your booking. Please try again.',
+                });
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        // Initialize the application after the DOM is fully loaded
+        window.onload = function() {
+            initializeFirebase();
+        };
+
+    </script>
+</body>
+</html>
