@@ -58,4 +58,5 @@ jobs:
           action: "close"
 
 env:
-  MY_SECRET: ${{ secrets.MY_SECRET }}
+  MY_SECRET: ${{ secrets.FIREBASEAPI }}
+
