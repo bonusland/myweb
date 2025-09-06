@@ -4,287 +4,393 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Paws Society</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Lucide Icons for modern icons -->
+    <script src="https://unpkg.com/lucide-react@0.292.0/dist/lucide-react.js"></script>
     <style>
+        /* Custom font and scrollbar styling for a better look and feel */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7fafc;
+            background-color: #f0f4f8;
         }
-        .container-shadow {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        /* Custom scrollbar for a more polished design */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Simple animation for loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+<body class="antialiased text-slate-700">
 
-    <!-- Hero Section -->
-    <header class="w-full bg-emerald-600 text-white py-12 container-shadow rounded-b-3xl">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Smart Paws Society</h1>
-            <p class="text-lg md:text-xl opacity-90">Helping you and your best friend communicate and connect.</p>
-        </div>
-    </header>
+    <!-- Main Application Container -->
+    <div id="app" class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
 
-    <!-- Services Section -->
-    <main class="w-full max-w-4xl px-4 mt-8">
-        <section id="services" class="bg-white p-8 rounded-2xl container-shadow mb-8">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Our Services</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Service Card 1 -->
-                <div class="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-xl transition transform hover:scale-105 duration-300">
-                    <svg class="w-16 h-16 text-emerald-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 17l-9 5-9-5" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 10l-9 5-9-5" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v9" />
-                    </svg>
-                    <h3 class="text-xl font-bold text-gray-700">Puppy Basics</h3>
-                    <p class="mt-2 text-sm text-gray-600">Start your puppy off right with socialization, potty training, and basic commands.</p>
-                </div>
-                <!-- Service Card 2 -->
-                <div class="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-xl transition transform hover:scale-105 duration-300">
-                    <svg class="w-16 h-16 text-emerald-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h2m-2 4h2" />
-                    </svg>
-                    <h3 class="text-xl font-bold text-gray-700">Obedience Training</h3>
-                    <p class="mt-2 text-sm text-gray-600">Master core commands like sit, stay, and recall for a well-behaved companion.</p>
-                </div>
-                <!-- Service Card 3 -->
-                <div class="flex flex-col items-center text-center p-6 bg-emerald-50 rounded-xl transition transform hover:scale-105 duration-300">
-                    <svg class="w-16 h-16 text-emerald-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 100 4m0-4v4m-5 4a2 2 0 100 4m0-4v4m14-4a2 2 0 100 4m0-4v4" />
-                    </svg>
-                    <h3 class="text-xl font-bold text-gray-700">Agility & Fun</h3>
-                    <p class="mt-2 text-sm text-gray-600">Engage your dog's mind and body with fun agility exercises and advanced tricks.</p>
-                </div>
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <div class="flex items-center justify-center gap-3 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="4" cy="8" r="2"/><path d="M9 10.5A5 5 0 0 1 12 5a5 5 0 0 1 3 5.5"/><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8Z"/></svg>
+                <h1 class="text-4xl font-bold text-slate-800">Smart Paws Society</h1>
             </div>
-        </section>
+            <p class="text-slate-500">Arrange and join group dog walks in your area.</p>
+            <p id="welcome-message" class="mt-4 text-emerald-600 font-medium hidden"></p>
+        </header>
 
-        <!-- Booking Form Section -->
-        <section id="booking" class="bg-white p-8 rounded-2xl container-shadow mb-8">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Book a Session</h2>
-            <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
-                    <label for="serviceType" class="block text-sm font-medium text-gray-700 mb-1">Select Service</label>
-                    <select id="serviceType" name="serviceType" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
-                        <option value="">-- Please select a service --</option>
-                        <option value="Puppy Basics">Puppy Basics</option>
-                        <option value="Obedience Training">Obedience Training</option>
-                        <option value="Agility & Fun">Agility & Fun</option>
-                    </select>
+        <!-- Create a New Walk Form -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-slate-800">Host a New Walk</h2>
+            <form id="create-walk-form">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-slate-600 mb-1">Location / Park</label>
+                        <input type="text" id="location" name="location" placeholder="e.g., Park, Pub, Excel" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label for="datetime" class="block text-sm font-medium text-slate-600 mb-1">Date & Time</label>
+                        <input type="datetime-local" id="datetime" name="datetime" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
                 </div>
-                <div>
-                    <label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                    <input type="text" id="userName" name="userName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
+                <div class="mt-4">
+                    <label for="description" class="block text-sm font-medium text-slate-600 mb-1">Description (Optional)</label>
+                    <textarea id="description" name="description" rows="2" placeholder="e.g., Meet near the main entrance. All friendly dogs welcome!" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"></textarea>
                 </div>
-                <div>
-                    <label for="dogName" class="block text-sm font-medium text-gray-700 mb-1">Your Dog's Name</label>
-                    <input type="text" id="dogName" name="dogName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
-                </div>
-                <div>
-                    <label for="contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                    <input type="email" id="contactEmail" name="contactEmail" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
-                </div>
-                <div>
-                    <label for="bookingDate" class="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
-                    <input type="date" id="bookingDate" name="bookingDate" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border">
-                </div>
-                <div class="md:col-span-2">
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes (Optional)</label>
-                    <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2 border"></textarea>
-                </div>
-                <div class="md:col-span-2 text-center">
-                    <button type="submit" class="w-full md:w-auto px-6 py-3 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 ease-in-out">
-                        Book Now
+                <div class="mt-4 text-right">
+                    <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                        Create Walk
                     </button>
                 </div>
             </form>
-        </section>
+        </div>
 
-        <!-- Bookings List Section -->
-        <section id="myBookings" class="bg-white p-8 rounded-2xl container-shadow mb-8 hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-3xl font-bold text-gray-800">Bookings</h2>
+        <!-- Upcoming Walks List -->
+        <div>
+            <div id="walks-list" class="space-y-4">
+                <!-- Walk cards will be inserted here by JavaScript -->
             </div>
-            <div id="bookingsList" class="space-y-4">
-                <!-- Bookings will be rendered here -->
-                <p id="loadingMessage" class="text-center text-gray-500">Loading bookings...</p>
-                <p id="noBookingsMessage" class="text-center text-gray-500 hidden">No bookings have been made yet.</p>
+            <div id="loading" class="text-center py-8">
+                <div class="spinner mx-auto"></div>
+                <p class="mt-2 text-slate-500">Fetching walks...</p>
             </div>
-        </section>
-        
-        <p id="userIdDisplay" class="text-xs text-gray-500 text-center mb-4">User ID: <span id="userIdValue">Loading...</span></p>
+             <p id="no-walks" class="hidden text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md">No walks scheduled. Why not create one?</p>
+        </div>
 
-    </main>
+    </div>
 
+    <!-- User Name Modal -->
+    <div id="user-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Welcome!</h2>
+            <p class="text-slate-500 mb-6">Please enter your name to join the fun.</p>
+            <form id="user-name-form">
+                <input type="text" id="username" placeholder="Your Name" required class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-center text-lg">
+                <button type="submit" class="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                    Let's Go!
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white py-2 px-5 rounded-lg shadow-xl opacity-0 translate-y-10 transition-all duration-300">
+        <p id="toast-message"></p>
+    </div>
+
+    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Set Firebase debug level
-        setLogLevel('debug');
-
-        // Firebase Configuration
+        // --- Configuration ---
+        // Connecting to your personal Firebase project
         const firebaseConfig = {
             apiKey: "AIzaSyDQXoIZZBszreZjVm1W8hdruxMerS1dy60",
             authDomain: "smartpawssociety.firebaseapp.com",
             projectId: "smartpawssociety",
             storageBucket: "smartpawssociety.appspot.com",
-            messagingSenderId: "8526735724",
+            messagingSenderId: "8526735724"
         };
-        const appId = firebaseConfig.projectId;
-        const initialAuthToken = null;
+        const appId = 'smartpawssociety';
 
-        // Firebase Initialization
-        let app, db, auth, userId;
+        // --- Firebase Initialization ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        async function initializeFirebase() {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
+        // --- Firestore Collections ---
+        // Storing data in a public path for this collaborative app
+        const walksCollection = collection(db, 'walks');
+        const usersCollection = collection(db, 'users');
+        
+        // --- State ---
+        let currentUser = null;
+        let userProfile = null;
+        let unsubscribeWalks = null;
 
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                userId = auth.currentUser.uid;
-                document.getElementById('userIdValue').textContent = userId;
-                console.log("Firebase initialized successfully for user:", userId);
-                
-                // Show the bookings list section after initialization
-                const myBookingsSection = document.getElementById('myBookings');
-                if (myBookingsSection) {
-                    myBookingsSection.classList.remove('hidden');
-                }
+        // --- UI Elements ---
+        const createWalkForm = document.getElementById('create-walk-form');
+        const walksList = document.getElementById('walks-list');
+        const userModal = document.getElementById('user-modal');
+        const userNameForm = document.getElementById('user-name-form');
+        const usernameInput = document.getElementById('username');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const loadingDiv = document.getElementById('loading');
+        const noWalksDiv = document.getElementById('no-walks');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
 
-                // Set up the real-time listener for bookings
-                setupBookingsListener();
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Initialization Error',
-                    text: 'Could not connect to the database. Please try again later.'
-                });
-            }
+        // --- Utility Functions ---
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+            }, 3000);
         }
 
-        // Set up real-time listener for bookings
-        function setupBookingsListener() {
-            if (!db) {
-                console.error("Firestore is not initialized.");
-                return;
-            }
-
-            const bookingsCollectionPath = `/artifacts/${appId}/public/data/bookings`;
-            const q = query(collection(db, bookingsCollectionPath));
-
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const bookingsList = document.getElementById('bookingsList');
-                const loadingMessage = document.getElementById('loadingMessage');
-                const noBookingsMessage = document.getElementById('noBookingsMessage');
-
-                if (!bookingsList || !loadingMessage || !noBookingsMessage) {
-                    console.error("DOM elements not found, aborting snapshot update.");
-                    return;
-                }
-                
-                bookingsList.innerHTML = '';
-                loadingMessage.classList.add('hidden');
-                
-                const bookings = [];
-                snapshot.forEach((doc) => {
-                    bookings.push({ id: doc.id, ...doc.data() });
-                });
-
-                if (bookings.length === 0) {
-                    noBookingsMessage.classList.remove('hidden');
-                } else {
-                    noBookingsMessage.classList.add('hidden');
-                    bookings.forEach(booking => {
-                        const bookingCard = document.createElement('div');
-                        bookingCard.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-200';
-                        bookingCard.innerHTML = `
-                            <p class="font-bold text-lg text-emerald-700">${booking.serviceType}</p>
-                            <p class="text-sm text-gray-600 mt-1">Booked by: <span class="font-semibold">${booking.userName}</span> (<span class="text-xs text-gray-500">${booking.userId}</span>)</p>
-                            <p class="text-sm text-gray-600">For: <span class="font-semibold">${booking.dogName}</span></p>
-                            <p class="text-sm text-gray-600">Date: <span class="font-semibold">${booking.bookingDate}</span></p>
-                            ${booking.notes ? `<p class="text-sm text-gray-600">Notes: ${booking.notes}</p>` : ''}
-                        `;
-                        bookingsList.appendChild(bookingCard);
-                    });
-                }
-            }, (error) => {
-                console.error("Error fetching bookings:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to load bookings. Please check the console for details.'
-                });
+        function formatWalkDate(date) {
+            return new Date(date).toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
             });
         }
+        
+        // --- Main Application Logic ---
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Check if user has a profile with a name
+                const userDocRef = doc(usersCollection, currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
 
-        // Handle form submission
-        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const form = e.target;
-            const submitButton = form.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-
-            const bookingData = {
-                serviceType: form.serviceType.value,
-                userName: form.userName.value,
-                dogName: form.dogName.value,
-                contactEmail: form.contactEmail.value,
-                bookingDate: form.bookingDate.value,
-                notes: form.notes.value,
-                timestamp: new Date(),
-                userId: userId // Add the user ID to the booking document
-            };
-
-            try {
-                if (!db) {
-                    throw new Error("Firestore is not initialized.");
+                if (userDoc.exists()) {
+                    userProfile = { id: currentUser.uid, ...userDoc.data() };
+                    userModal.classList.add('hidden');
+                    welcomeMessage.textContent = `Welcome, ${userProfile.name}!`;
+                    welcomeMessage.classList.remove('hidden');
+                    fetchAndRenderWalks();
+                } else {
+                    // New user, show modal to get their name
+                    userModal.classList.remove('hidden');
                 }
-
-                const bookingsCollectionPath = `/artifacts/${appId}/public/data/bookings`;
-                const docRef = await addDoc(collection(db, bookingsCollectionPath), bookingData);
-                console.log("Document written with ID: ", docRef.id);
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Booking Confirmed!',
-                    text: 'Thank you for your booking. We will be in touch shortly!',
-                    confirmButtonText: 'Great!'
-                });
-
-                form.reset();
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to submit your booking. Please try again.',
-                });
-            } finally {
-                submitButton.disabled = false;
+            } else {
+                // If no user, sign in anonymously
+                await signInAnonymously(auth);
             }
         });
 
-        // Initialize the application after the DOM is fully loaded
-        window.onload = function() {
-            initializeFirebase();
-        };
+        // Handle user name submission
+        userNameForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = usernameInput.value.trim();
+            if (name && currentUser) {
+                const userDocRef = doc(usersCollection, currentUser.uid);
+                await setDoc(userDocRef, { name });
+                userProfile = { id: currentUser.uid, name };
+                userModal.classList.add('hidden');
+                welcomeMessage.textContent = `Welcome, ${userProfile.name}!`;
+                welcomeMessage.classList.remove('hidden');
+                fetchAndRenderWalks();
+                showToast(`Welcome aboard, ${name}!`);
+            }
+        });
+
+        // Handle walk creation
+        createWalkForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!userProfile) {
+                showToast('Please set your name first!');
+                return;
+            }
+
+            const location = createWalkForm.location.value;
+            const datetime = createWalkForm.datetime.value;
+            const description = createWalkForm.description.value;
+            
+            if (new Date(datetime) < new Date()) {
+                showToast("You can't schedule a walk in the past!");
+                return;
+            }
+
+            try {
+                await addDoc(walksCollection, {
+                    location,
+                    dateTime: new Date(datetime).toISOString(),
+                    description,
+                    creatorId: userProfile.id,
+                    creatorName: userProfile.name,
+                    attendees: [{ userId: userProfile.id, userName: userProfile.name }],
+                    createdAt: serverTimestamp()
+                });
+                createWalkForm.reset();
+                showToast('Walk created successfully!');
+            } catch (error) {
+                console.error("Error creating walk: ", error);
+                showToast('Failed to create walk. Please try again.');
+            }
+        });
+
+        // Fetch and render walks in real-time
+        function fetchAndRenderWalks() {
+            if (unsubscribeWalks) unsubscribeWalks(); // Unsubscribe from previous listener
+
+            const q = query(walksCollection);
+            
+            unsubscribeWalks = onSnapshot(q, (snapshot) => {
+                loadingDiv.style.display = 'none';
+                
+                const walks = snapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime)); // Sort chronologically
+
+                if (walks.length === 0) {
+                    noWalksDiv.classList.remove('hidden');
+                    walksList.innerHTML = '';
+                } else {
+                    noWalksDiv.classList.add('hidden');
+                    renderWalks(walks);
+                }
+            }, (error) => {
+                console.error("Error fetching walks:", error);
+                loadingDiv.innerText = "Error loading walks.";
+            });
+        }
+        
+        function renderWalks(walks) {
+            walksList.innerHTML = ''; // Clear existing list
+            const now = new Date();
+
+            const upcomingWalks = walks.filter(walk => new Date(walk.dateTime) >= now);
+            const pastWalks = walks.filter(walk => new Date(walk.dateTime) < now).reverse(); // Newest past walk first
+
+            // --- Render Upcoming Walks section ---
+            const upcomingHeader = document.createElement('h2');
+            upcomingHeader.className = "text-2xl font-semibold mb-4 text-slate-800";
+            upcomingHeader.textContent = "Upcoming Walks";
+            walksList.appendChild(upcomingHeader);
+
+            if (upcomingWalks.length > 0) {
+                upcomingWalks.forEach(walk => {
+                    const walkCard = createWalkCard(walk, false);
+                    walksList.appendChild(walkCard);
+                });
+            } else {
+                 const noUpcoming = document.createElement('p');
+                 noUpcoming.className = "text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md";
+                 noUpcoming.textContent = "No upcoming walks scheduled. Why not create one?";
+                 walksList.appendChild(noUpcoming);
+            }
+
+            // --- Render Past Walks section ---
+             if (pastWalks.length > 0) {
+                const pastHeader = document.createElement('h2');
+                pastHeader.className = "text-2xl font-semibold mt-8 mb-4 text-slate-800";
+                pastHeader.textContent = "Past Walks";
+                walksList.appendChild(pastHeader);
+
+                pastWalks.forEach(walk => {
+                    const walkCard = createWalkCard(walk, true);
+                    walksList.appendChild(walkCard);
+                });
+            }
+        }
+        
+        function createWalkCard(walk, isPast) {
+            const isAttending = userProfile && walk.attendees.some(att => att.userId === userProfile.id);
+
+            const walkCard = document.createElement('div');
+            walkCard.className = `bg-white p-5 rounded-xl shadow-lg ${isPast ? 'opacity-70' : 'transition-transform transform hover:scale-[1.02]'}`;
+            
+            const joinButtonHtml = isPast
+                ? `<span class="mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-slate-500 bg-slate-200 cursor-default">Completed</span>`
+                : `<button 
+                        data-walk-id="${walk.id}" 
+                        class="join-btn mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-white transition ${isAttending ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}"
+                        ${isAttending ? 'disabled' : ''}
+                    >
+                        ${isAttending ? 'You are going!' : 'Join Walk'}
+                    </button>`;
+            
+            const whoIsGoingText = isPast ? "Who went?" : "Who's going?";
+
+            walkCard.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-200 pb-3 mb-3">
+                    <div>
+                        <h3 class="text-xl font-bold ${isPast ? 'text-slate-500' : 'text-emerald-600'}">${walk.location}</h3>
+                        <p class="text-sm text-slate-500">${formatWalkDate(walk.dateTime)}</p>
+                    </div>
+                    ${joinButtonHtml}
+                </div>
+                <p class="text-slate-600 mb-4">${walk.description || 'No description provided.'}</p>
+                <div>
+                    <h4 class="font-semibold text-sm mb-2 text-slate-700">${whoIsGoingText} (${walk.attendees.length})</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${walk.attendees.map(att => `<span class="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-full">${att.userName} ${att.userId === walk.creatorId ? '(Host)' : ''}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            return walkCard;
+        }
+        
+        // Event delegation for joining walks
+        walksList.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('join-btn')) {
+                const walkId = e.target.dataset.walkId;
+                if (!walkId || !userProfile) return;
+
+                e.target.disabled = true;
+                e.target.textContent = 'Joining...';
+                
+                const walkDocRef = doc(walksCollection, walkId);
+                try {
+                    await updateDoc(walkDocRef, {
+                        attendees: arrayUnion({
+                            userId: userProfile.id,
+                            userName: userProfile.name
+                        })
+                    });
+                    showToast('You have joined the walk!');
+                } catch (error) {
+                    console.error("Error joining walk:", error);
+                    showToast('Could not join walk. Try again.');
+                    e.target.disabled = false;
+                    e.target.textContent = 'Join Walk';
+                }
+            }
+        });
 
     </script>
 </body>
 </html>
+
+
+
+
