@@ -163,12 +163,11 @@
         let unsubscribeWalks = null;
         let isInitialLoad = true; // Flag to prevent notifications on first page load
 
+        // --- DOM Elements ---
+        const userModal = document.getElementById('user-modal');
+        const userForm = document.getElementById('user-form');
         const walksList = document.getElementById('walks-list');
         const createWalkForm = document.getElementById('create-walk-form');
-        const walksList = document.getElementById('walks-list');
-        const userModal = document.getElementById('user-modal');
-        const userNameForm = document.getElementById('user-name-form');
-        const usernameInput = document.getElementById('username');
         const welcomeMessage = document.getElementById('welcome-message');
         const loadingDiv = document.getElementById('loading');
         const noWalksDiv = document.getElementById('no-walks');
