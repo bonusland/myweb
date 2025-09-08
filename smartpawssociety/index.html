@@ -241,37 +241,45 @@
         createWalkForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!userProfile) {
-                showToast('Please set your name first!');
+                showToast("Please enter your name first.");
                 return;
             }
 
-            const location = createWalkForm.location.value;
-            const datetime = createWalkForm.datetime.value;
-            const description = createWalkForm.description.value;
-            
-            if (new Date(datetime) < new Date()) {
-                showToast("You can't schedule a walk in the past!");
+            const location = createWalkForm.location.value.trim();
+            const dateTime = createWalkForm.dateTime.value;
+            const description = createWalkForm.description.value.trim();
+
+            if (!location || !dateTime) {
+                showToast("Please fill in location and date/time.");
                 return;
             }
+
+            const submitButton = createWalkForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creating...';
 
             try {
+                // The fix is to add the 'creatorId' here
                 await addDoc(walksCollection, {
                     location,
-                    dateTime: new Date(datetime).toISOString(),
+                    dateTime,
                     description,
-                    creatorId: userProfile.id,
-                    creatorName: userProfile.name,
+                    creatorId: userProfile.id, // This line is the fix
                     attendees: [{ userId: userProfile.id, userName: userProfile.name }],
                     createdAt: serverTimestamp()
                 });
                 createWalkForm.reset();
-                showToast('Walk created successfully!');
+                showToast("Walk created successfully!");
             } catch (error) {
                 console.error("Error creating walk: ", error);
                 showToast("Failed to create walk.");
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Create Walk';
             }
         });
 
+        // Fetch and render walks in real-time
         function fetchAndRenderWalks() {
             if (unsubscribeWalks) unsubscribeWalks();
 
@@ -434,3 +442,8 @@
     </script>
 </body>
 </html>
+
+
+
+
+
