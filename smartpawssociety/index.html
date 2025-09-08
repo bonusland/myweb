@@ -155,17 +155,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- Firestore Collections ---
-        // Storing data in a public path for this collaborative app
         const walksCollection = collection(db, 'walks');
         const usersCollection = collection(db, 'users');
         
-        // --- State ---
         let currentUser = null;
         let userProfile = null;
         let unsubscribeWalks = null;
+        let isInitialLoad = true; // Flag to prevent notifications on first page load
 
-        // --- UI Elements ---
+        const walksList = document.getElementById('walks-list');
         const createWalkForm = document.getElementById('create-walk-form');
         const walksList = document.getElementById('walks-list');
         const userModal = document.getElementById('user-modal');
@@ -271,22 +269,36 @@
                 showToast('Walk created successfully!');
             } catch (error) {
                 console.error("Error creating walk: ", error);
-                showToast('Failed to create walk. Please try again.');
+                showToast("Failed to create walk.");
             }
         });
 
-        // Fetch and render walks in real-time
         function fetchAndRenderWalks() {
-            if (unsubscribeWalks) unsubscribeWalks(); // Unsubscribe from previous listener
+            if (unsubscribeWalks) unsubscribeWalks();
 
             const q = query(walksCollection);
             
             unsubscribeWalks = onSnapshot(q, (snapshot) => {
                 loadingDiv.style.display = 'none';
+
+                // Notification logic for new walks
+                if (!isInitialLoad && userProfile) {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added') {
+                            const walkData = change.doc.data();
+                            // Only show notification if the walk was created by someone else
+                            if (walkData.creatorId !== userProfile.id) {
+                                const host = walkData.attendees.find(att => att.userId === walkData.creatorId);
+                                const hostName = host ? host.userName : 'a user';
+                                showToast(`New walk posted: "${walkData.location}" by ${hostName}`);
+                            }
+                        }
+                    });
+                }
                 
                 const walks = snapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime)); // Sort chronologically
+                    .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
 
                 if (walks.length === 0) {
                     noWalksDiv.classList.remove('hidden');
@@ -295,6 +307,8 @@
                     noWalksDiv.classList.add('hidden');
                     renderWalks(walks);
                 }
+                
+                isInitialLoad = false; // Set flag to false after initial data is processed
             }, (error) => {
                 console.error("Error fetching walks:", error);
                 loadingDiv.innerText = "Error loading walks.";
@@ -421,5 +435,3 @@
     </script>
 </body>
 </html>
-
-
