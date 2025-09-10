@@ -48,6 +48,7 @@ function showToast(message) {
 }
 
 function formatWalkDate(date) {
+    if (!date || isNaN(new Date(date))) return "Invalid date";
     return new Date(date).toLocaleString('en-US', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
         hour: 'numeric', minute: '2-digit', hour12: true
@@ -69,9 +70,10 @@ function weatherCodeToInfo(code) {
 async function fetchWeatherForWalk(dateTimeString) {
     try {
         const walkDate = new Date(dateTimeString);
-        const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        if (isNaN(walkDate)) return null;
 
-        if (walkDate > sevenDaysFromNow) return null; // Only fetch for walks within the next 7 days
+        const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        if (walkDate > sevenDaysFromNow) return null;
 
         const dateISO = walkDate.toISOString().split('T')[0];
         const walkHour = walkDate.getHours();
@@ -180,7 +182,14 @@ createWalkForm.addEventListener('submit', async (e) => {
     const location = createWalkForm.location.value.trim();
     const dateTime = createWalkForm.datetime.value;
     const description = createWalkForm.description.value.trim();
+
     if (!location || !dateTime) { showToast("Please fill in location and date/time."); return; }
+    
+    if (new Date(dateTime) < new Date()) {
+        showToast("You can't schedule a walk in the past!");
+        return;
+    }
+
     const submitButton = createWalkForm.querySelector('button[type="submit"]');
     submitButton.disabled = true;
     submitButton.textContent = 'Creating...';
@@ -208,6 +217,7 @@ function fetchAndRenderWalks() {
     
     unsubscribeWalks = onSnapshot(q, (snapshot) => {
         loadingDiv.style.display = 'none';
+        
         if (!isInitialLoad && userProfile) {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
@@ -223,7 +233,14 @@ function fetchAndRenderWalks() {
         }
         const walks = snapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() }))
-            .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+            .sort((a, b) => {
+                const dateA = new Date(a.dateTime);
+                const dateB = new Date(b.dateTime);
+                if (isNaN(dateA)) return 1;
+                if (isNaN(dateB)) return -1;
+                return dateA - dateB;
+            });
+        
         renderWalks(walks);
         isInitialLoad = false;
     }, (error) => {
@@ -234,24 +251,26 @@ function fetchAndRenderWalks() {
 
 async function renderWalks(walks) {
     walksList.innerHTML = '';
+    noWalksDiv.classList.add('hidden');
+    
     const now = new Date();
     const upcomingWalks = walks.filter(walk => new Date(walk.dateTime) >= now);
     const pastWalks = walks.filter(walk => new Date(walk.dateTime) < now).reverse();
 
-    const upcomingHeader = document.createElement('h2');
-    upcomingHeader.className = "text-2xl font-semibold mb-4 text-slate-800";
-    upcomingHeader.textContent = "Upcoming Walks";
-    walksList.appendChild(upcomingHeader);
+    if (upcomingWalks.length === 0 && pastWalks.length === 0) {
+        noWalksDiv.classList.remove('hidden');
+        walksList.innerHTML = ''; // Ensure list is clear
+        return;
+    }
 
     if (upcomingWalks.length > 0) {
+        const upcomingHeader = document.createElement('h2');
+        upcomingHeader.className = "text-2xl font-semibold mb-4 text-slate-800";
+        upcomingHeader.textContent = "Upcoming Walks";
+        walksList.appendChild(upcomingHeader);
         const walkCardPromises = upcomingWalks.map(walk => createWalkCard(walk, false));
         const walkCards = await Promise.all(walkCardPromises);
         walkCards.forEach(card => walksList.appendChild(card));
-    } else {
-         const noUpcoming = document.createElement('p');
-         noUpcoming.className = "text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md";
-         noUpcoming.textContent = "No upcoming walks scheduled. Why not create one?";
-         walksList.appendChild(noUpcoming);
     }
 
      if (pastWalks.length > 0) {
@@ -282,14 +301,17 @@ async function createWalkCard(walk, isPast) {
     
     const dateP = document.createElement('p');
     dateP.className = 'text-sm text-slate-500 flex items-center';
-    dateP.textContent = formatWalkDate(walk.dateTime);
+    
+    // FIX: Create a text node for the date first, then append weather if available
+    const dateTextNode = document.createTextNode(formatWalkDate(walk.dateTime));
+    dateP.appendChild(dateTextNode);
 
     if (!isPast) {
         const weather = await fetchWeatherForWalk(walk.dateTime);
         if (weather) {
             const weatherSpan = document.createElement('span');
             weatherSpan.className = 'font-medium ml-2 text-slate-600';
-            weatherSpan.textContent = `${weather.icon} ${weather.temperature}°C`;
+            weatherSpan.textContent = ` ${weather.icon} ${weather.temperature}°C`;
             dateP.appendChild(weatherSpan);
         }
     }
