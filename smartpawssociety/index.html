@@ -42,16 +42,16 @@
                  <div class="w-20"></div>
                 <div class="text-center">
                      <div class="flex items-center justify-center gap-3">
-                        <svg xmlns="http://www.w.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="4" cy="8" r="2"/><path d="M9 10.5A5 5 0 0 1 12 5a5 5 0 0 1 3 5.5"/><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="4" cy="8" r="2"/><path d="M9 10.5A5 5 0 0 1 12 5a5 5 0 0 1 3 5.5"/><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8Z"/></svg>
                         <h1 class="text-3xl sm:text-4xl font-bold text-slate-800">The Paw Society</h1>
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-2 w-20">
                     <button id="notifications-btn" title="Enable Browser Notifications" class="p-2 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors">
-                         <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                     </button>
                     <button id="refresh-btn" title="Refresh Walks" class="p-2 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors">
-                        <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>
                     </button>
                 </div>
             </div>
@@ -157,6 +157,34 @@
         const refreshBtn = document.getElementById('refresh-btn');
         const notificationsBtn = document.getElementById('notifications-btn');
 
+        // --- Cookie Management ---
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (JSON.stringify(value) || "") + expires + "; path=/; SameSite=Lax; Secure";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) {
+                    try {
+                        return JSON.parse(c.substring(nameEQ.length, c.length));
+                    } catch(e) {
+                        return null;
+                    }
+                }
+            }
+            return null;
+        }
+
         // --- Utility Functions ---
         function showToast(message) {
             toastMessage.textContent = message;
@@ -211,6 +239,14 @@
                 });
             }
         }
+        
+        // --- Initial Load ---
+        // Check for user profile cookie on page load for a faster welcome message
+        const savedProfile = getCookie('pawSocietyProfile');
+        if (savedProfile && savedProfile.name) {
+            welcomeMessage.textContent = `Welcome back, ${savedProfile.name}!`;
+            welcomeMessage.classList.remove('hidden');
+        }
 
         // --- Main Application Logic ---
         onAuthStateChanged(auth, async (user) => {
@@ -220,6 +256,7 @@
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists()) {
                     userProfile = { id: currentUser.uid, ...userDoc.data() };
+                    setCookie('pawSocietyProfile', userProfile, 30); // Refresh the cookie
                     userModal.classList.add('hidden');
                     welcomeMessage.textContent = `Welcome back, ${userProfile.name}!`;
                     welcomeMessage.classList.remove('hidden');
@@ -240,6 +277,7 @@
                 const userDocRef = doc(usersCollection, currentUser.uid);
                 await setDoc(userDocRef, { name });
                 userProfile = { id: currentUser.uid, name };
+                setCookie('pawSocietyProfile', userProfile, 30); // Set cookie on new profile
                 userModal.classList.add('hidden');
                 welcomeMessage.textContent = `Welcome, ${userProfile.name}!`;
                 welcomeMessage.classList.remove('hidden');
