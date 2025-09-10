@@ -1,9 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, doc, addDoc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, doc, addDoc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // --- Configuration ---
-// Connecting to your personal Firebase project
 const firebaseConfig = {
     apiKey: "AIzaSyDQXoIZZBszreZjVm1W8hdruxMerS1dy60",
     authDomain: "smartpawssociety.firebaseapp.com",
@@ -11,7 +10,6 @@ const firebaseConfig = {
     storageBucket: "smartpawssociety.appspot.com",
     messagingSenderId: "8526735724"
 };
-const appId = 'smartpawssociety';
 
 // --- Firebase Initialization ---
 const app = initializeApp(firebaseConfig);
@@ -24,7 +22,7 @@ const usersCollection = collection(db, 'users');
 let currentUser = null;
 let userProfile = null;
 let unsubscribeWalks = null;
-let isInitialLoad = true; // Flag to prevent notifications on first page load
+let isInitialLoad = true;
 
 // --- DOM Elements ---
 const userModal = document.getElementById('user-modal');
@@ -38,6 +36,7 @@ const noWalksDiv = document.getElementById('no-walks');
 const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toast-message');
 const refreshBtn = document.getElementById('refresh-btn');
+const notificationsBtn = document.getElementById('notifications-btn');
 
 // --- Utility Functions ---
 function showToast(message) {
@@ -50,13 +49,8 @@ function showToast(message) {
 
 function formatWalkDate(date) {
     return new Date(date).toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true
     });
 }
 
@@ -75,8 +69,9 @@ function weatherCodeToInfo(code) {
 async function fetchWeatherForWalk(dateTimeString) {
     try {
         const walkDate = new Date(dateTimeString);
-        // Only fetch for walks within the next 7 days
-        if ((walkDate - new Date()) > 7 * 24 * 60 * 60 * 1000) return null;
+        const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+        if (walkDate > sevenDaysFromNow) return null; // Only fetch for walks within the next 7 days
 
         const dateISO = walkDate.toISOString().split('T')[0];
         const walkHour = walkDate.getHours();
@@ -103,20 +98,57 @@ async function fetchWeatherForWalk(dateTimeString) {
     }
 }
 
+// --- Browser Notification Logic ---
+function setupNotifications() {
+    if (!('Notification' in window)) {
+        notificationsBtn.style.display = 'none';
+        return;
+    }
+    const bellIcon = notificationsBtn.querySelector('svg');
+    if (Notification.permission === 'granted') {
+         bellIcon.style.color = '#10b981';
+    } else if (Notification.permission === 'denied') {
+        notificationsBtn.disabled = true;
+        notificationsBtn.title = "Notifications are blocked in your browser settings.";
+    }
+    notificationsBtn.addEventListener('click', async () => {
+        if (Notification.permission !== 'granted') {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                bellIcon.style.color = '#10b981';
+                showToast('Browser notifications enabled!');
+                new Notification('The Paw Society', {
+                    body: 'You will now be notified of new walks!',
+                    icon: 'https://placehold.co/96x96/10b981/FFFFFF?text=🐾'
+                });
+            } else {
+                showToast('Notifications were not enabled.');
+            }
+        }
+    });
+}
+
+function showBrowserNotification(title, body) {
+    if (Notification.permission === 'granted' && document.hidden) {
+         new Notification(title, {
+            body: body,
+            icon: 'https://placehold.co/96x96/10b981/FFFFFF?text=🐾'
+        });
+    }
+}
 
 // --- Main Application Logic ---
-
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
         const userDocRef = doc(usersCollection, currentUser.uid);
         const userDoc = await getDoc(userDocRef);
-
         if (userDoc.exists()) {
             userProfile = { id: currentUser.uid, ...userDoc.data() };
             userModal.classList.add('hidden');
             welcomeMessage.textContent = `Welcome back, ${userProfile.name}!`;
             welcomeMessage.classList.remove('hidden');
+            setupNotifications();
             fetchAndRenderWalks();
         } else {
             userModal.classList.remove('hidden');
@@ -136,6 +168,7 @@ userNameForm.addEventListener('submit', async (e) => {
         userModal.classList.add('hidden');
         welcomeMessage.textContent = `Welcome, ${userProfile.name}!`;
         welcomeMessage.classList.remove('hidden');
+        setupNotifications();
         fetchAndRenderWalks();
         showToast(`Welcome aboard, ${name}!`);
     }
@@ -143,24 +176,14 @@ userNameForm.addEventListener('submit', async (e) => {
 
 createWalkForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!userProfile) {
-        showToast("Please enter your name first.");
-        return;
-    }
-
+    if (!userProfile) { showToast("Please enter your name first."); return; }
     const location = createWalkForm.location.value.trim();
     const dateTime = createWalkForm.datetime.value;
     const description = createWalkForm.description.value.trim();
-
-    if (!location || !dateTime) {
-        showToast("Please fill in location and date/time.");
-        return;
-    }
-
+    if (!location || !dateTime) { showToast("Please fill in location and date/time."); return; }
     const submitButton = createWalkForm.querySelector('button[type="submit"]');
     submitButton.disabled = true;
     submitButton.textContent = 'Creating...';
-
     try {
         await addDoc(walksCollection, {
             location, dateTime, description,
@@ -185,32 +208,23 @@ function fetchAndRenderWalks() {
     
     unsubscribeWalks = onSnapshot(q, (snapshot) => {
         loadingDiv.style.display = 'none';
-
         if (!isInitialLoad && userProfile) {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const walkData = change.doc.data();
                     if (walkData.creatorId !== userProfile.id) {
-                        const host = walkData.attendees.find(att => att.userId === walkData.creatorId);
-                        const hostName = host ? host.userName : 'a user';
-                        showToast(`New walk posted: "${walkData.location}" by ${hostName}`);
+                        const hostName = walkData.attendees.find(att => att.userId === walkData.creatorId)?.userName || 'A user';
+                        const message = `At "${walkData.location}" by ${hostName}`;
+                        showToast(`New walk posted!`);
+                        showBrowserNotification('New Walk Posted!', message);
                     }
                 }
             });
         }
-        
         const walks = snapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() }))
             .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
-
-        if (walks.length === 0) {
-            noWalksDiv.classList.remove('hidden');
-            walksList.innerHTML = '';
-        } else {
-            noWalksDiv.classList.add('hidden');
-            renderWalks(walks);
-        }
-        
+        renderWalks(walks);
         isInitialLoad = false;
     }, (error) => {
         console.error("Error fetching walks:", error);
@@ -221,7 +235,6 @@ function fetchAndRenderWalks() {
 async function renderWalks(walks) {
     walksList.innerHTML = '';
     const now = new Date();
-
     const upcomingWalks = walks.filter(walk => new Date(walk.dateTime) >= now);
     const pastWalks = walks.filter(walk => new Date(walk.dateTime) < now).reverse();
 
@@ -246,60 +259,90 @@ async function renderWalks(walks) {
         pastHeader.className = "text-2xl font-semibold mt-8 mb-4 text-slate-800";
         pastHeader.textContent = "Past Walks";
         walksList.appendChild(pastHeader);
-        
-        // No need to fetch weather for past walks, so no promise.all is needed
-        pastWalks.forEach(walk => {
-            const walkCard = createWalkCard(walk, true);
+        for (const walk of pastWalks) {
+            const walkCard = await createWalkCard(walk, true);
             walksList.appendChild(walkCard);
-        });
+        }
     }
 }
 
 async function createWalkCard(walk, isPast) {
     const isAttending = userProfile && walk.attendees.some(att => att.userId === userProfile.id);
-
+    
     const walkCard = document.createElement('div');
     walkCard.className = `bg-white p-5 rounded-xl shadow-lg ${isPast ? 'opacity-70' : 'transition-transform transform hover:scale-[1.02]'}`;
-    
-    let joinButtonHtml = '';
-    if (isPast) {
-        joinButtonHtml = `<span class="mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-slate-500 bg-slate-200 cursor-default">Completed</span>`;
-    } else {
-        joinButtonHtml = `<button 
-                data-walk-id="${walk.id}" 
-                class="join-btn mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-white transition ${isAttending ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}"
-                ${isAttending ? 'disabled' : ''}
-            >
-                ${isAttending ? 'You are going!' : 'Join Walk'}
-            </button>`;
-    }
-    
-    const whoIsGoingText = isPast ? "Who went?" : "Who's going?";
 
-    let weatherHtml = '';
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-200 pb-3 mb-3';
+
+    const titleDiv = document.createElement('div');
+    const locationH3 = document.createElement('h3');
+    locationH3.className = `text-xl font-bold ${isPast ? 'text-slate-500' : 'text-emerald-600'}`;
+    locationH3.textContent = walk.location;
+    
+    const dateP = document.createElement('p');
+    dateP.className = 'text-sm text-slate-500 flex items-center';
+    dateP.textContent = formatWalkDate(walk.dateTime);
+
     if (!isPast) {
         const weather = await fetchWeatherForWalk(walk.dateTime);
         if (weather) {
-            weatherHtml = `<span class="font-medium ml-2 text-slate-600">${weather.icon} ${weather.temperature}°C</span>`;
+            const weatherSpan = document.createElement('span');
+            weatherSpan.className = 'font-medium ml-2 text-slate-600';
+            weatherSpan.textContent = `${weather.icon} ${weather.temperature}°C`;
+            dateP.appendChild(weatherSpan);
         }
     }
 
-    walkCard.innerHTML = `
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-200 pb-3 mb-3">
-            <div>
-                <h3 class="text-xl font-bold ${isPast ? 'text-slate-500' : 'text-emerald-600'}">${walk.location}</h3>
-                <p class="text-sm text-slate-500 flex items-center">${formatWalkDate(walk.dateTime)} ${weatherHtml}</p>
-            </div>
-            ${joinButtonHtml}
-        </div>
-        <p class="text-slate-600 mb-4">${walk.description || 'No description provided.'}</p>
-        <div>
-            <h4 class="font-semibold text-sm mb-2 text-slate-700">${whoIsGoingText} (${walk.attendees.length})</h4>
-            <div class="flex flex-wrap gap-2">
-                ${walk.attendees.map(att => `<span class="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-full">${att.userName} ${att.userId === walk.creatorId ? '(Host)' : ''}</span>`).join('')}
-            </div>
-        </div>
-    `;
+    titleDiv.append(locationH3, dateP);
+
+    let joinButton;
+    if (isPast) {
+        joinButton = document.createElement('span');
+        joinButton.className = 'mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-slate-500 bg-slate-200 cursor-default';
+        joinButton.textContent = 'Completed';
+    } else {
+        joinButton = document.createElement('button');
+        joinButton.dataset.walkId = walk.id;
+        joinButton.className = `join-btn mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-white transition`;
+        if (isAttending) {
+            joinButton.classList.add('bg-slate-400', 'cursor-not-allowed');
+            joinButton.textContent = 'You are going!';
+            joinButton.disabled = true;
+        } else {
+            joinButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            joinButton.textContent = 'Join Walk';
+        }
+    }
+    
+    headerDiv.append(titleDiv, joinButton);
+    
+    const descriptionP = document.createElement('p');
+    descriptionP.className = 'text-slate-600 mb-4';
+    descriptionP.textContent = walk.description || 'No description provided.';
+
+    const attendeesDiv = document.createElement('div');
+    const attendeesH4 = document.createElement('h4');
+    attendeesH4.className = 'font-semibold text-sm mb-2 text-slate-700';
+    attendeesH4.textContent = `${isPast ? "Who went?" : "Who's going?"} (${walk.attendees.length})`;
+    
+    const attendeesListDiv = document.createElement('div');
+    attendeesListDiv.className = 'flex flex-wrap gap-2';
+
+    walk.attendees.forEach(att => {
+        const attendeeSpan = document.createElement('span');
+        attendeeSpan.className = 'bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-full';
+        let attendeeText = att.userName;
+        if (att.userId === walk.creatorId) {
+            attendeeText += ' (Host)';
+        }
+        attendeeSpan.textContent = attendeeText;
+        attendeesListDiv.appendChild(attendeeSpan);
+    });
+    
+    attendeesDiv.append(attendeesH4, attendeesListDiv);
+    walkCard.append(headerDiv, descriptionP, attendeesDiv);
+    
     return walkCard;
 }
 
@@ -307,17 +350,13 @@ walksList.addEventListener('click', async (e) => {
     if (e.target.classList.contains('join-btn')) {
         const walkId = e.target.dataset.walkId;
         if (!walkId || !userProfile) return;
-
         e.target.disabled = true;
         e.target.textContent = 'Joining...';
         
-        const walkDocRef = doc(walksCollection, walkId);
         try {
+            const walkDocRef = doc(walksCollection, walkId);
             await updateDoc(walkDocRef, {
-                attendees: arrayUnion({
-                    userId: userProfile.id,
-                    userName: userProfile.name
-                })
+                attendees: arrayUnion({ userId: userProfile.id, userName: userProfile.name })
             });
             showToast('You have joined the walk!');
         } catch (error) {
@@ -333,11 +372,7 @@ refreshBtn.addEventListener('click', () => {
     showToast('Refreshing walks...');
     const icon = refreshBtn.querySelector('svg');
     icon.classList.add('spinning');
-    
     fetchAndRenderWalks();
-
-    icon.addEventListener('animationend', () => {
-        icon.classList.remove('spinning');
-    }, { once: true });
+    icon.addEventListener('animationend', () => icon.classList.remove('spinning'), { once: true });
 });
 
