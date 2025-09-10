@@ -60,12 +60,55 @@ function formatWalkDate(date) {
     });
 }
 
+// --- Weather Fetching Logic ---
+function weatherCodeToInfo(code) {
+    const codes = {
+        0: { icon: '☀️' }, 1: { icon: '🌤️' }, 2: { icon: '⛅' }, 3: { icon: '☁️' },
+        45: { icon: '🌫️' }, 48: { icon: '🌫️' },
+        51: { icon: '🌦️' }, 53: { icon: '🌦️' }, 55: { icon: '🌦️' },
+        61: { icon: '🌧️' }, 63: { icon: '🌧️' }, 65: { icon: '🌧️' },
+        80: { icon: '🌦️' }, 81: { icon: '🌦️' }, 82: { icon: '🌦️' },
+    };
+    return codes[code] || { icon: '' };
+}
+
+async function fetchWeatherForWalk(dateTimeString) {
+    try {
+        const walkDate = new Date(dateTimeString);
+        // Only fetch for walks within the next 7 days
+        if ((walkDate - new Date()) > 7 * 24 * 60 * 60 * 1000) return null;
+
+        const dateISO = walkDate.toISOString().split('T')[0];
+        const walkHour = walkDate.getHours();
+
+        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=51.5074&longitude=-0.1278&hourly=temperature_2m,weathercode&timezone=Europe/London&start_date=${dateISO}&end_date=${dateISO}`;
+        
+        const response = await fetch(apiUrl);
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        if (!data.hourly || !data.hourly.time) return null;
+
+        const hourIndex = data.hourly.time.findIndex(time => new Date(time).getHours() === walkHour);
+        if (hourIndex === -1) return null;
+
+        const temperature = Math.round(data.hourly.temperature_2m[hourIndex]);
+        const weatherCode = data.hourly.weathercode[hourIndex];
+        const { icon } = weatherCodeToInfo(weatherCode);
+
+        return { temperature, icon };
+    } catch (error) {
+        console.error("Failed to fetch weather:", error);
+        return null;
+    }
+}
+
+
 // --- Main Application Logic ---
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        // Check if user has a profile with a name
         const userDocRef = doc(usersCollection, currentUser.uid);
         const userDoc = await getDoc(userDocRef);
 
@@ -76,16 +119,13 @@ onAuthStateChanged(auth, async (user) => {
             welcomeMessage.classList.remove('hidden');
             fetchAndRenderWalks();
         } else {
-            // New user, show modal to get their name
             userModal.classList.remove('hidden');
         }
     } else {
-        // If no user, sign in anonymously
         await signInAnonymously(auth);
     }
 });
 
-// Handle user name submission
 userNameForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = usernameInput.value.trim();
@@ -101,7 +141,6 @@ userNameForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Handle walk creation
 createWalkForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!userProfile) {
@@ -124,9 +163,7 @@ createWalkForm.addEventListener('submit', async (e) => {
 
     try {
         await addDoc(walksCollection, {
-            location,
-            dateTime,
-            description,
+            location, dateTime, description,
             creatorId: userProfile.id,
             attendees: [{ userId: userProfile.id, userName: userProfile.name }],
             createdAt: serverTimestamp()
@@ -142,21 +179,17 @@ createWalkForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Fetch and render walks in real-time
 function fetchAndRenderWalks() {
     if (unsubscribeWalks) unsubscribeWalks();
-
     const q = query(walksCollection);
     
     unsubscribeWalks = onSnapshot(q, (snapshot) => {
         loadingDiv.style.display = 'none';
 
-        // Notification logic for new walks
         if (!isInitialLoad && userProfile) {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const walkData = change.doc.data();
-                    // Only show notification if the walk was created by someone else
                     if (walkData.creatorId !== userProfile.id) {
                         const host = walkData.attendees.find(att => att.userId === walkData.creatorId);
                         const hostName = host ? host.userName : 'a user';
@@ -178,31 +211,29 @@ function fetchAndRenderWalks() {
             renderWalks(walks);
         }
         
-        isInitialLoad = false; // Set flag to false after initial data is processed
+        isInitialLoad = false;
     }, (error) => {
         console.error("Error fetching walks:", error);
         loadingDiv.innerText = "Error loading walks.";
     });
 }
 
-function renderWalks(walks) {
-    walksList.innerHTML = ''; // Clear existing list
+async function renderWalks(walks) {
+    walksList.innerHTML = '';
     const now = new Date();
 
     const upcomingWalks = walks.filter(walk => new Date(walk.dateTime) >= now);
-    const pastWalks = walks.filter(walk => new Date(walk.dateTime) < now).reverse(); // Newest past walk first
+    const pastWalks = walks.filter(walk => new Date(walk.dateTime) < now).reverse();
 
-    // --- Render Upcoming Walks section ---
     const upcomingHeader = document.createElement('h2');
     upcomingHeader.className = "text-2xl font-semibold mb-4 text-slate-800";
     upcomingHeader.textContent = "Upcoming Walks";
     walksList.appendChild(upcomingHeader);
 
     if (upcomingWalks.length > 0) {
-        upcomingWalks.forEach(walk => {
-            const walkCard = createWalkCard(walk, false);
-            walksList.appendChild(walkCard);
-        });
+        const walkCardPromises = upcomingWalks.map(walk => createWalkCard(walk, false));
+        const walkCards = await Promise.all(walkCardPromises);
+        walkCards.forEach(card => walksList.appendChild(card));
     } else {
          const noUpcoming = document.createElement('p');
          noUpcoming.className = "text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md";
@@ -210,13 +241,13 @@ function renderWalks(walks) {
          walksList.appendChild(noUpcoming);
     }
 
-    // --- Render Past Walks section ---
      if (pastWalks.length > 0) {
         const pastHeader = document.createElement('h2');
         pastHeader.className = "text-2xl font-semibold mt-8 mb-4 text-slate-800";
         pastHeader.textContent = "Past Walks";
         walksList.appendChild(pastHeader);
-
+        
+        // No need to fetch weather for past walks, so no promise.all is needed
         pastWalks.forEach(walk => {
             const walkCard = createWalkCard(walk, true);
             walksList.appendChild(walkCard);
@@ -224,29 +255,40 @@ function renderWalks(walks) {
     }
 }
 
-function createWalkCard(walk, isPast) {
+async function createWalkCard(walk, isPast) {
     const isAttending = userProfile && walk.attendees.some(att => att.userId === userProfile.id);
 
     const walkCard = document.createElement('div');
     walkCard.className = `bg-white p-5 rounded-xl shadow-lg ${isPast ? 'opacity-70' : 'transition-transform transform hover:scale-[1.02]'}`;
     
-    const joinButtonHtml = isPast
-        ? `<span class="mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-slate-500 bg-slate-200 cursor-default">Completed</span>`
-        : `<button 
+    let joinButtonHtml = '';
+    if (isPast) {
+        joinButtonHtml = `<span class="mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-slate-500 bg-slate-200 cursor-default">Completed</span>`;
+    } else {
+        joinButtonHtml = `<button 
                 data-walk-id="${walk.id}" 
                 class="join-btn mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-white transition ${isAttending ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}"
                 ${isAttending ? 'disabled' : ''}
             >
                 ${isAttending ? 'You are going!' : 'Join Walk'}
             </button>`;
+    }
     
     const whoIsGoingText = isPast ? "Who went?" : "Who's going?";
+
+    let weatherHtml = '';
+    if (!isPast) {
+        const weather = await fetchWeatherForWalk(walk.dateTime);
+        if (weather) {
+            weatherHtml = `<span class="font-medium ml-2 text-slate-600">${weather.icon} ${weather.temperature}°C</span>`;
+        }
+    }
 
     walkCard.innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-200 pb-3 mb-3">
             <div>
                 <h3 class="text-xl font-bold ${isPast ? 'text-slate-500' : 'text-emerald-600'}">${walk.location}</h3>
-                <p class="text-sm text-slate-500">${formatWalkDate(walk.dateTime)}</p>
+                <p class="text-sm text-slate-500 flex items-center">${formatWalkDate(walk.dateTime)} ${weatherHtml}</p>
             </div>
             ${joinButtonHtml}
         </div>
@@ -261,7 +303,6 @@ function createWalkCard(walk, isPast) {
     return walkCard;
 }
 
-// Event delegation for joining walks
 walksList.addEventListener('click', async (e) => {
     if (e.target.classList.contains('join-btn')) {
         const walkId = e.target.dataset.walkId;
@@ -288,7 +329,6 @@ walksList.addEventListener('click', async (e) => {
     }
 });
 
-// Handle manual refresh
 refreshBtn.addEventListener('click', () => {
     showToast('Refreshing walks...');
     const icon = refreshBtn.querySelector('svg');
@@ -296,7 +336,6 @@ refreshBtn.addEventListener('click', () => {
     
     fetchAndRenderWalks();
 
-    // Remove the animation class after it completes
     icon.addEventListener('animationend', () => {
         icon.classList.remove('spinning');
     }, { once: true });
