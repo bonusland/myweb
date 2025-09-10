@@ -6,30 +6,8 @@
     <title>The Paw Society</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom font and scrollbar styling for a better look and feel */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-        }
-        /* Custom scrollbar for a more polished design */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-        /* Simple animation for loading spinner */
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: #09f;
-            animation: spin 1s ease infinite;
-        }
-        .spinning { animation: spin 1s ease-in-out; }
-    </style>
+    <!-- Link to your new stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="antialiased text-slate-700">
 
@@ -39,21 +17,16 @@
         <!-- Header -->
         <header class="mb-8">
             <div class="flex justify-between items-center">
-                 <div class="w-20"></div>
+                <div class="w-10 h-10"></div>
                 <div class="text-center">
                      <div class="flex items-center justify-center gap-3">
                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="4" cy="8" r="2"/><path d="M9 10.5A5 5 0 0 1 12 5a5 5 0 0 1 3 5.5"/><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8Z"/></svg>
                         <h1 class="text-3xl sm:text-4xl font-bold text-slate-800">The Paw Society</h1>
                     </div>
                 </div>
-                <div class="flex items-center justify-end gap-2 w-20">
-                    <button id="notifications-btn" title="Enable Browser Notifications" class="p-2 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-                    </button>
-                    <button id="refresh-btn" title="Refresh Walks" class="p-2 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>
-                    </button>
-                </div>
+                <button id="refresh-btn" title="Refresh Walks" class="p-2 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>
+                </button>
             </div>
             <div class="text-center mt-2">
                 <p class="text-slate-500">Arrange and join group dog walks in your area.</p>
@@ -87,14 +60,18 @@
             </form>
         </div>
 
-        <!-- Walk Lists Container -->
+        <!-- Upcoming Walks List -->
         <div>
-            <div id="walks-list" class="space-y-4"></div>
+            <div id="walks-list" class="space-y-4">
+                <!-- Walk cards will be inserted here by JavaScript -->
+            </div>
             <div id="loading" class="text-center py-8">
                 <div class="spinner mx-auto"></div>
                 <p class="mt-2 text-slate-500">Fetching walks...</p>
             </div>
+             <p id="no-walks" class="hidden text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md">No walks scheduled. Why not create one?</p>
         </div>
+
     </div>
 
     <!-- User Name Modal -->
@@ -116,367 +93,8 @@
         <p id="toast-message"></p>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyDQXoIZZBszreZjVm1W8hdruxMerS1dy60",
-            authDomain: "smartpawssociety.firebaseapp.com",
-            projectId: "smartpawssociety",
-            storageBucket: "smartpawssociety.appspot.com",
-            messagingSenderId: "8526735724"
-        };
-
-        // --- Firebase Initialization ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const walksCollection = collection(db, 'walks');
-        const usersCollection = collection(db, 'users');
-        
-        let currentUser = null;
-        let userProfile = null;
-        let unsubscribeWalks = null;
-        let isInitialLoad = true; 
-
-        // --- DOM Elements ---
-        const userModal = document.getElementById('user-modal');
-        const userNameForm = document.getElementById('user-name-form');
-        const usernameInput = document.getElementById('username');
-        const walksList = document.getElementById('walks-list');
-        const createWalkForm = document.getElementById('create-walk-form');
-        const welcomeMessage = document.getElementById('welcome-message');
-        const loadingDiv = document.getElementById('loading');
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toast-message');
-        const refreshBtn = document.getElementById('refresh-btn');
-        const notificationsBtn = document.getElementById('notifications-btn');
-
-        // --- Cookie Management ---
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (JSON.stringify(value) || "") + expires + "; path=/; SameSite=Lax; Secure";
-        }
-
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) {
-                    try {
-                        return JSON.parse(c.substring(nameEQ.length, c.length));
-                    } catch(e) {
-                        return null;
-                    }
-                }
-            }
-            return null;
-        }
-
-        // --- Utility Functions ---
-        function showToast(message) {
-            toastMessage.textContent = message;
-            toast.classList.remove('opacity-0', 'translate-y-10');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-10');
-            }, 3000);
-        }
-
-        function formatWalkDate(date) {
-            return new Date(date).toLocaleString('en-US', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                hour: 'numeric', minute: '2-digit', hour12: true
-            });
-        }
-        
-        // --- Browser Notification Logic ---
-        function setupNotifications() {
-            if (!('Notification' in window)) {
-                notificationsBtn.style.display = 'none';
-                return;
-            }
-            const bellIcon = notificationsBtn.querySelector('svg');
-            if (Notification.permission === 'granted') {
-                 bellIcon.style.color = '#10b981';
-            } else if (Notification.permission === 'denied') {
-                notificationsBtn.disabled = true;
-                notificationsBtn.title = "Notifications are blocked in your browser settings.";
-            }
-            notificationsBtn.addEventListener('click', async () => {
-                if (Notification.permission !== 'granted') {
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        bellIcon.style.color = '#10b981';
-                        showToast('Browser notifications enabled!');
-                        new Notification('The Paw Society', {
-                            body: 'You will now be notified of new walks!',
-                            icon: 'https://placehold.co/96x96/10b981/FFFFFF?text=🐾'
-                        });
-                    } else {
-                        showToast('Notifications were not enabled.');
-                    }
-                }
-            });
-        }
-
-        function showBrowserNotification(title, body) {
-            if (Notification.permission === 'granted' && document.hidden) {
-                 new Notification(title, {
-                    body: body,
-                    icon: 'https://placehold.co/96x96/10b981/FFFFFF?text=🐾'
-                });
-            }
-        }
-        
-        // --- Initial Load ---
-        // Check for user profile cookie on page load for a faster welcome message
-        const savedProfile = getCookie('pawSocietyProfile');
-        if (savedProfile && savedProfile.name) {
-            welcomeMessage.textContent = `Welcome back, ${savedProfile.name}!`;
-            welcomeMessage.classList.remove('hidden');
-        }
-
-        // --- Main Application Logic ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                const userDocRef = doc(usersCollection, currentUser.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    userProfile = { id: currentUser.uid, ...userDoc.data() };
-                    setCookie('pawSocietyProfile', userProfile, 30); // Refresh the cookie
-                    userModal.classList.add('hidden');
-                    welcomeMessage.textContent = `Welcome back, ${userProfile.name}!`;
-                    welcomeMessage.classList.remove('hidden');
-                    setupNotifications();
-                    fetchAndRenderWalks();
-                } else {
-                    userModal.classList.remove('hidden');
-                }
-            } else {
-                await signInAnonymously(auth);
-            }
-        });
-
-        userNameForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = usernameInput.value.trim();
-            if (name && currentUser) {
-                const userDocRef = doc(usersCollection, currentUser.uid);
-                await setDoc(userDocRef, { name });
-                userProfile = { id: currentUser.uid, name };
-                setCookie('pawSocietyProfile', userProfile, 30); // Set cookie on new profile
-                userModal.classList.add('hidden');
-                welcomeMessage.textContent = `Welcome, ${userProfile.name}!`;
-                welcomeMessage.classList.remove('hidden');
-                setupNotifications();
-                fetchAndRenderWalks();
-                showToast(`Welcome aboard, ${name}!`);
-            }
-        });
-
-        createWalkForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!userProfile) { showToast("Please enter your name first."); return; }
-            const location = createWalkForm.location.value.trim();
-            const dateTime = createWalkForm.datetime.value;
-            const description = createWalkForm.description.value.trim();
-            if (!location || !dateTime) { showToast("Please fill in location and date/time."); return; }
-            const submitButton = createWalkForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Creating...';
-            try {
-                await addDoc(walksCollection, {
-                    location, dateTime, description,
-                    creatorId: userProfile.id,
-                    attendees: [{ userId: userProfile.id, userName: userProfile.name }],
-                    createdAt: serverTimestamp()
-                });
-                createWalkForm.reset();
-                showToast("Walk created successfully!");
-            } catch (error) {
-                console.error("Error creating walk: ", error);
-                showToast("Failed to create walk.");
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Create Walk';
-            }
-        });
-
-        function fetchAndRenderWalks() {
-            if (unsubscribeWalks) unsubscribeWalks();
-            const q = query(walksCollection);
-            
-            unsubscribeWalks = onSnapshot(q, (snapshot) => {
-                loadingDiv.style.display = 'none';
-                if (!isInitialLoad && userProfile) {
-                    snapshot.docChanges().forEach((change) => {
-                        if (change.type === 'added') {
-                            const walkData = change.doc.data();
-                            if (walkData.creatorId !== userProfile.id) {
-                                const hostName = walkData.attendees.find(att => att.userId === walkData.creatorId)?.userName || 'A user';
-                                const message = `At "${walkData.location}" by ${hostName}`;
-                                showToast(`New walk posted!`);
-                                showBrowserNotification('New Walk Posted!', message);
-                            }
-                        }
-                    });
-                }
-                const walks = snapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
-                renderWalks(walks);
-                isInitialLoad = false;
-            }, (error) => {
-                console.error("Error fetching walks:", error);
-                loadingDiv.innerText = "Error loading walks.";
-            });
-        }
-        
-        function renderWalks(walks) {
-            walksList.innerHTML = '';
-            const now = new Date();
-            const upcomingWalks = walks.filter(walk => new Date(walk.dateTime) >= now);
-            const pastWalks = walks.filter(walk => new Date(walk.dateTime) < now).reverse();
-
-            const upcomingHeader = document.createElement('h2');
-            upcomingHeader.className = "text-2xl font-semibold mb-4 text-slate-800";
-            upcomingHeader.textContent = "Upcoming Walks";
-            walksList.appendChild(upcomingHeader);
-
-            if (upcomingWalks.length > 0) {
-                upcomingWalks.forEach(walk => walksList.appendChild(createWalkCard(walk, false)));
-            } else {
-                 const noUpcoming = document.createElement('p');
-                 noUpcoming.className = "text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md";
-                 noUpcoming.textContent = "No upcoming walks scheduled. Why not create one?";
-                 walksList.appendChild(noUpcoming);
-            }
-
-             if (pastWalks.length > 0) {
-                const pastHeader = document.createElement('h2');
-                pastHeader.className = "text-2xl font-semibold mt-8 mb-4 text-slate-800";
-                pastHeader.textContent = "Past Walks";
-                walksList.appendChild(pastHeader);
-                pastWalks.forEach(walk => walksList.appendChild(createWalkCard(walk, true)));
-            }
-        }
-        
-        // --- SECURE CARD CREATION ---
-        // This function is rewritten to avoid using .innerHTML with user-provided content.
-        function createWalkCard(walk, isPast) {
-            const isAttending = userProfile && walk.attendees.some(att => att.userId === userProfile.id);
-            
-            const walkCard = document.createElement('div');
-            walkCard.className = `bg-white p-5 rounded-xl shadow-lg ${isPast ? 'opacity-70' : 'transition-transform transform hover:scale-[1.02]'}`;
-
-            const headerDiv = document.createElement('div');
-            headerDiv.className = 'flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-200 pb-3 mb-3';
-
-            const titleDiv = document.createElement('div');
-            const locationH3 = document.createElement('h3');
-            locationH3.className = `text-xl font-bold ${isPast ? 'text-slate-500' : 'text-emerald-600'}`;
-            locationH3.textContent = walk.location; // Securely set text
-            
-            const dateP = document.createElement('p');
-            dateP.className = 'text-sm text-slate-500';
-            dateP.textContent = formatWalkDate(walk.dateTime); // Securely set text
-
-            titleDiv.append(locationH3, dateP);
-
-            let joinButton;
-            if (isPast) {
-                joinButton = document.createElement('span');
-                joinButton.className = 'mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-slate-500 bg-slate-200 cursor-default';
-                joinButton.textContent = 'Completed';
-            } else {
-                joinButton = document.createElement('button');
-                joinButton.dataset.walkId = walk.id;
-                joinButton.className = `join-btn mt-3 sm:mt-0 px-5 py-2 rounded-lg font-semibold text-white transition`;
-                if (isAttending) {
-                    joinButton.classList.add('bg-slate-400', 'cursor-not-allowed');
-                    joinButton.textContent = 'You are going!';
-                    joinButton.disabled = true;
-                } else {
-                    joinButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
-                    joinButton.textContent = 'Join Walk';
-                }
-            }
-            
-            headerDiv.append(titleDiv, joinButton);
-            
-            const descriptionP = document.createElement('p');
-            descriptionP.className = 'text-slate-600 mb-4';
-            descriptionP.textContent = walk.description || 'No description provided.'; // Securely set text
-
-            const attendeesDiv = document.createElement('div');
-            const attendeesH4 = document.createElement('h4');
-            attendeesH4.className = 'font-semibold text-sm mb-2 text-slate-700';
-            attendeesH4.textContent = `${isPast ? "Who went?" : "Who's going?"} (${walk.attendees.length})`;
-            
-            const attendeesListDiv = document.createElement('div');
-            attendeesListDiv.className = 'flex flex-wrap gap-2';
-
-            walk.attendees.forEach(att => {
-                const attendeeSpan = document.createElement('span');
-                attendeeSpan.className = 'bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-full';
-                let attendeeText = att.userName;
-                if (att.userId === walk.creatorId) {
-                    attendeeText += ' (Host)';
-                }
-                attendeeSpan.textContent = attendeeText; // Securely set text
-                attendeesListDiv.appendChild(attendeeSpan);
-            });
-            
-            attendeesDiv.append(attendeesH4, attendeesListDiv);
-            walkCard.append(headerDiv, descriptionP, attendeesDiv);
-            
-            return walkCard;
-        }
-        
-        walksList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('join-btn')) {
-                const walkId = e.target.dataset.walkId;
-                if (!walkId || !userProfile) return;
-                e.target.disabled = true;
-                e.target.textContent = 'Joining...';
-                
-                try {
-                    const walkDocRef = doc(walksCollection, walkId);
-                    await updateDoc(walkDocRef, {
-                        attendees: arrayUnion({ userId: userProfile.id, userName: userProfile.name })
-                    });
-                    showToast('You have joined the walk!');
-                } catch (error) {
-                    console.error("Error joining walk:", error);
-                    showToast('Could not join walk. Try again.');
-                    e.target.disabled = false;
-                    e.target.textContent = 'Join Walk';
-                }
-            }
-        });
-
-        refreshBtn.addEventListener('click', () => {
-            showToast('Refreshing walks...');
-            const icon = refreshBtn.querySelector('svg');
-            icon.classList.add('spinning');
-            fetchAndRenderWalks();
-            icon.addEventListener('animationend', () => icon.classList.remove('spinning'), { once: true });
-        });
-
-    </script>
+    <!-- Link to your new JavaScript file -->
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
 
