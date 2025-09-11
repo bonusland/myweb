@@ -294,9 +294,18 @@ async function createWalkCard(walk, isPast) {
     headerDiv.className = 'flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-200 pb-3 mb-3';
 
     const titleDiv = document.createElement('div');
+    
+    // --- Google Maps Link Integration ---
+    const locationLink = document.createElement('a');
+    locationLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(walk.location)}`;
+    locationLink.target = '_blank'; // Open in a new tab
+    locationLink.rel = 'noopener noreferrer';
+    locationLink.className = 'hover:underline';
+
     const locationH3 = document.createElement('h3');
     locationH3.className = `text-xl font-bold ${isPast ? 'text-slate-500' : 'text-emerald-600'}`;
     locationH3.textContent = walk.location;
+    locationLink.appendChild(locationH3);
     
     const dateP = document.createElement('p');
     dateP.className = 'text-sm text-slate-500 flex items-center';
@@ -313,7 +322,7 @@ async function createWalkCard(walk, isPast) {
         }
     }
 
-    titleDiv.append(locationH3, dateP);
+    titleDiv.append(locationLink, dateP);
 
     let joinButton;
     if (isPast) {
