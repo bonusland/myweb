@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Paw Society</title>
-    <!-- OneSignal SDK -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link to your custom stylesheet -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="antialiased text-slate-700">
@@ -66,14 +65,16 @@
             </form>
         </div>
 
-        <!-- Walk Lists Container -->
+        <!-- Upcoming Walks List -->
         <div>
-            <div id="walks-list" class="space-y-4"></div>
+            <div id="walks-list" class="space-y-4">
+                <!-- Walk cards will be inserted here by JavaScript -->
+            </div>
             <div id="loading" class="text-center py-8">
                 <div class="spinner mx-auto"></div>
                 <p class="mt-2 text-slate-500">Fetching walks...</p>
             </div>
-            <p id="no-walks" class="hidden text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md">No walks scheduled. Why not create one?</p>
+             <p id="no-walks" class="hidden text-center text-slate-500 py-8 bg-white rounded-2xl shadow-md">No walks scheduled. Why not create one?</p>
         </div>
 
     </div>
@@ -97,6 +98,7 @@
         <p id="toast-message"></p>
     </div>
 
+    <!-- Link to your application logic script -->
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
